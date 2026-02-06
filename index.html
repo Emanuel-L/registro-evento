@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Registro Evento</title>
+<style>
+body{
+  font-family: Arial, sans-serif;
+  text-align:center;
+  padding:40px;
+}
+button{
+  padding:12px 20px;
+  font-size:16px;
+  margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="contenido">
+<h2>Actividad académica</h2>
+
+<p>
+Esta actividad será realizada en la Facultad de Medicina de la Universidad de Antioquia.
+El registro únicamente puede realizarse desde las instalaciones del lugar del evento.
+</p>
+
+<p>
+De acuerdo con la normativa colombiana sobre tratamiento de datos personales,
+se solicita autorización para acceder a la ubicación del dispositivo únicamente
+con el fin de validar que el registro se realiza dentro del lugar del evento.
+La información de ubicación no será almacenada.
+</p>
+
+<button onclick="verificarUbicacion()">Acepto y continuar</button>
+</div>
+
+<script>
+const formURL = "PEGA_AQUI_EL_LINK_DE_TU_FORMULARIO";
+
+// Coordenadas Facultad Medicina (puedes ajustarlas luego)
+const centro = { lat: 6.2635, lon: -75.5659 };
+
+const radioPermitido = 111;
+
+function distancia(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = x => x * Math.PI / 180;
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function verificarUbicacion(){
+  document.getElementById("contenido").innerHTML = "<p>Verificando ubicación...</p>";
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const d = distancia(
+      pos.coords.latitude,
+      pos.coords.longitude,
+      centro.lat,
+      centro.lon
+    );
+
+    if (d <= radioPermitido) {
+      window.location.href = formURL;
+    } else {
+      document.getElementById("contenido").innerHTML =
+        "<h3>No se puede registrar porque está por fuera del rango del evento.</h3>";
+    }
+
+  }, () => {
+    document.getElementById("contenido").innerHTML =
+      "<h3>Debes permitir el acceso a la ubicación para continuar.</h3>";
+  });
+}
+</script>
+
+</body>
+</html>
